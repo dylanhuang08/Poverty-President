@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presidential Poverty Crisis</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
+
+        :root {
+            --bg-color: #050505;
+            --text-color: #33ff33;
+            --alert-color: #ff3333;
+            --warning-color: #ffaa00;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background-color: #000;
+            font-family: 'Courier Prime', 'Courier New', Courier, monospace;
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        #crt-container {
+            width: 100%;
+            max-width: 900px;
+            height: 100%;
+            max-height: 850px;
+            background-color: var(--bg-color);
+            border: 20px solid #1a1a1a;
+            border-radius: 16px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-shadow: inset 0 0 40px rgba(51, 255, 51, 0.1), 0 0 20px rgba(0,0,0,0.8);
+            overflow: hidden;
+        }
+
+        #crt-container::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 10;
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+        }
+
+        header {
+            padding: 15px 20px;
+            border-bottom: 2px dashed var(--text-color);
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            background-color: #0a1a0a;
+            z-index: 5;
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-shadow: 0 0 5px var(--text-color);
+        }
+
+        .stat-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            margin-bottom: 4px;
+        }
+
+        .alert-text { color: var(--alert-color); text-shadow: 0 0 5px var(--alert-color); animation: blink 1s infinite; }
+        .warning-text { color: var(--warning-color); text-shadow: 0 0 5px var(--warning-color); }
+
+        @keyframes blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0.2; } }
+
+        #main-display {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #ascii-art {
+            white-space: pre;
+            text-align: center;
+            font-size: 14px;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            min-height: 150px;
+            text-shadow: 0 0 3px var(--text-color);
+        }
+
+        #text-content {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            text-shadow: 0 0 2px var(--text-color);
+        }
+
+        .diff-pos { color: var(--text-color); }
+        .diff-neg { color: var(--alert-color); }
+
+        #controls {
+            padding: 20px;
+            border-top: 2px dashed var(--text-color);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 5;
+            background-color: #081108;
+            max-height: 40%;
+            overflow-y: auto;
+        }
+
+        button {
+            background: transparent;
+            color: var(--text-color);
+            border: 1px solid var(--text-color);
+            font-family: inherit;
+            font-size: 1.1rem;
+            padding: 12px;
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.1s;
+            text-shadow: 0 0 3px var(--text-color);
+        }
+
+        button:hover {
+            background: var(--text-color);
+            color: var(--bg-color);
+            text-shadow: none;
+        }
+
+        .hidden { display: none !important; }
+        
+        .aftermath-box {
+            margin-top: 15px; 
+            background: #112; 
+            padding: 15px; 
+            border: 1px dashed #44f;
+            color: #ccc;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="crt-container">
+        <header id="stats-header" class="hidden">
+            <div class="stat-box">
+                <span class="stat-label">CYCLE</span>
+                <span id="ui-turn">1/20</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">POVERTY</span>
+                <span id="ui-poverty">10.2%</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">BUDGET</span>
+                <span id="ui-budget">$4.0T</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">APPROVAL</span>
+                <span id="ui-approval">50%</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">INFLATION</span>
+                <span id="ui-inflation">3.0%</span>
+            </div>
+        </header>
+
+        <div id="main-display">
+            <div id="ascii-art"></div>
+            <div id="text-content"></div>
+        </div>
+
+        <div id="controls">
+            <!-- Buttons dynamically injected here -->
+        </div>
+    </div>
+
+    <script>
+        const ASCII = {
+            whitehouse: `
+        _ _.-'\`-._ _
+       ;.'________'.;
+        ---------
+       /| _  _  _ |\\
+      | |[_][_][_]| |
+      | |[_][_][_]| |
+    __|_|_________|_|__`,
+            money: `
+       _______
+      /       \\
+     |  $$$$$  |
+     |  $ 4 T  |
+     |  $$$$$  |
+      \\_______/`,
+            protest: `
+      \\o/   \\o/   \\o/
+       |     |     |
+      / \\   / \\   / \\
+     [STRIKE] [FAIR WAGE]`,
+            factory: `
+       | | | |
+      _|_|_|_|_
+     |         |
+     |_________|
+    /           \\`,
+            graph: `
+      ^
+    % |    /\\
+      |   /  \\
+      |  /    \\/\\
+      | /
+      +----------->
+          TIME`,
+            newspaper: `
+    ___________________
+   |  THE DAILY NEWS   |
+   |===================|
+   |  BREAKING STORY   |
+   |                   |
+   |===================|
+   |___________________|`,
+            skull: `
+        _____
+       /     \\
+      | () () |
+       \\  ^  /
+        |||||`
+        };
+
+        let state = {
+            turn: 1,
+            poverty: 10.2,
+            budget: 4.0,
+            approval: 50,
+            inflation: 3.0,
+            midtermsFailed: false
+        };
+
+        const UI = {
+            header: document.getElementById('stats-header'),
+            turn: document.getElementById('ui-turn'),
+            poverty: document.getElementById('ui-poverty'),
+            budget: document.getElementById('ui-budget'),
+            approval: document.getElementById('ui-approval'),
+            inflation: document.getElementById('ui-inflation'),
+            ascii: document.getElementById('ascii-art'),
+            text: document.getElementById('text-content'),
+            controls: document.getElementById('controls')
+        };
+
+        function fix(num) {
+            return Number(Math.round(num + "e2") + "e-2");
+        }
+
+        const scenarios = [
+            {
+                title: "The Relief Check",
+                desc: "Families are struggling to make ends meet. Congress has drafted a bill to send relief checks directly to citizens. The public is eagerly waiting to see how generous you will be.",
+                art: 'money',
+                options: [
+                    { 
+                        text: "Send a $1,000 check to every American.",
+                        pov: -2.5, bud: -1.5, app: 8, inf: 4.0,
+                        aftermath: "The checks were wildly popular, and people immediately spent the cash. However, because factories and shipping couldn't keep up with the sudden massive spike in buying, businesses simply raised their prices. You triggered demand-pull inflation, meaning the $1,000 quickly lost its real purchasing power."
+                    },
+                    { 
+                        text: "Send checks only to the poorest families.",
+                        pov: -1.0, bud: -0.5, app: 2, inf: 1.0,
+                        aftermath: "By targeting the aid, you kept the budget in check and helped those in dire need. But there's a catch: because the checks vanish once a family earns above a certain amount, some workers realized that picking up extra shifts actually lost them money overall, slightly lowering workforce participation."
+                    },
+                    { 
+                        text: "Veto the bill. We can't afford giveaways.",
+                        pov: 0.2, bud: 0, app: -3, inf: -0.2,
+                        aftermath: "You saved the treasury from a massive deficit and kept consumer demand from artificially driving up prices. However, without a lifeline, the poorest families fell further behind the natural rising cost of living, ticking poverty upward."
+                    }
+                ]
+            },
+            {
+                title: "The Federal Minimum Wage",
+                desc: "Fast food workers and retail employees are striking across the country, demanding a living wage. They want you to double the federal minimum wage.",
+                art: 'protest',
+                options: [
+                    {
+                        text: "Double the minimum wage immediately.",
+                        pov: -1.2, bud: 0, app: 1, inf: 1.5,
+                        aftermath: "Those who kept their jobs saw a massive boost in their quality of life. But smaller businesses couldn't afford the sudden payroll spike. To compensate, fast food joints rushed to buy self-checkout kiosks and automated fryers, replacing low-skill human labor with capital investments and causing a spike in youth unemployment."
+                    },
+                    {
+                        text: "Don't touch the wage, but expand worker tax credits.",
+                        pov: -0.8, bud: -0.4, app: 3, inf: 0.3,
+                        aftermath: "Instead of forcing businesses to pay more, the government effectively subsidized low wages via tax returns. This kept people employed because they remained cheap to hire, but it shifted the entire financial burden of their survival onto the federal budget."
+                    },
+                    {
+                        text: "Let the free market determine wages.",
+                        pov: 0.3, bud: 0, app: -4, inf: -0.3,
+                        aftermath: "You argued that wages should be tied strictly to a worker's economic output. While this kept businesses highly efficient, many corporations hold a monopoly on local jobs and can artificially keep entry-level wages depressed, driving up the number of 'working poor'."
+                    }
+                ]
+            },
+            {
+                title: "The Affordable Housing Crisis",
+                desc: "Rent is eating up half the income of the average working family. Homelessness is rising. You need a housing plan.",
+                art: 'factory',
+                options: [
+                    {
+                        text: "Hand out massive rent vouchers to the poor.",
+                        pov: -1.0, bud: -0.8, app: 4, inf: 1.2,
+                        aftermath: "You gave people money to pay rent. But because you didn't build any new apartments, you just gave more people money to fight over the exact same number of homes. Landlords realized they could just raise the rent to absorb your vouchers, neutralizing much of the policy."
+                    },
+                    {
+                        text: "Implement strict national rent control.",
+                        pov: -0.5, bud: 0, app: 3, inf: -0.5,
+                        aftermath: "Current renters rejoiced as their costs were frozen. However, real estate developers looked at the new rules, realized they could no longer make a profit, and stopped building new housing entirely. You created a massive long-term shortage of homes."
+                    },
+                    {
+                        text: "Slash zoning laws to let developers build everywhere.",
+                        pov: -0.2, bud: 0, app: -1, inf: 0.1,
+                        aftermath: "You removed the red tape, allowing companies to build massive high-density apartment blocks. This is a great long-term fix for housing supply, but building takes years. The lack of immediate relief angered voters currently facing eviction."
+                    }
+                ]
+            },
+            {
+                title: "The Medical Bill Epidemic",
+                desc: "Medical debt is the leading cause of bankruptcy. A trip to the hospital can ruin a family forever.",
+                art: 'whitehouse',
+                options: [
+                    {
+                        text: "Push for government-run healthcare (Medicare for All).",
+                        pov: -1.5, bud: -1.2, app: 2, inf: 1.0,
+                        aftermath: "You eliminated out-of-pocket medical debt, instantly pulling millions out of financial ruin. But with healthcare now 'free' at the point of use, people went to the doctor for every minor ailment. The system became overwhelmed, wait times skyrocketed, and the federal budget bled out."
+                    },
+                    {
+                        text: "Strictly cap the prices of prescription pills.",
+                        pov: -0.6, bud: 0.1, app: 4, inf: -0.4,
+                        aftermath: "Capping prices instantly saved lives and lowered household stress, making you a hero. In response, massive pharmaceutical companies realized their profit margins were gone, and they quietly slashed billions from their research and development budgets for future cures."
+                    },
+                    {
+                        text: "Give citizens cash subsidies to buy private insurance.",
+                        pov: -0.8, bud: -0.5, app: 1, inf: 0.5,
+                        aftermath: "More people got insured. But hospitals and insurance companies realized the government was footing the bill. They quietly began raising the base prices of procedures, causing a systemic inflation in medical costs that will require even more subsidies next year."
+                    }
+                ]
+            },
+            {
+                title: "Funding the Government",
+                desc: "Your ambitious programs cost money, and the deficit is looming. How will you raise the necessary funds?",
+                art: 'money',
+                options: [
+                    {
+                        text: "Heavily tax the big corporations.",
+                        pov: 0.4, bud: 1.0, app: 1, inf: -0.5,
+                        aftermath: "You replenished the Treasury. However, corporations didn't just absorb the loss. They passed the new tax burden down the line by freezing hiring, cutting bonuses, and slightly raising the prices of their goods, subtly hurting the working class."
+                    },
+                    {
+                        text: "Leave the tax code alone for now.",
+                        pov: 0, bud: 0, app: 0, inf: 0,
+                        aftermath: "Capital markets remained stable. Businesses continued their standard investment cycles without policy-induced shocks or panic."
+                    },
+                    {
+                        text: "Give massive tax breaks for building new factories.",
+                        pov: -0.3, bud: -0.6, app: -2, inf: 0.6,
+                        aftermath: "You told companies they could write off new equipment. This triggered a massive boom in productivity and hiring, lifting people out of poverty. But it starved the treasury of cash and caused temporary inflation as companies rushed to buy up steel and machinery."
+                    }
+                ]
+            },
+            {
+                title: "The Student Debt Crisis",
+                desc: "A whole generation is weighed down by student loans, unable to buy homes or start families.",
+                art: 'graph',
+                options: [
+                    {
+                        text: "Forgive all federal student debt.",
+                        pov: -0.5, bud: -0.6, app: 2, inf: 1.2,
+                        aftermath: "Millions suddenly had extra cash every month, heavily boosting consumer spending. However, this liquidity surge drove up prices everywhere. Furthermore, colleges realized the government would just forgive future loans, so they raised tuition prices even faster."
+                    },
+                    {
+                        text: "Cap loan payments based on income.",
+                        pov: -0.3, bud: -0.2, app: 1, inf: 0.3,
+                        aftermath: "You prevented acute poverty for young graduates by ensuring they never paid more than they could afford. It created a bit of a moral hazard—students borrowed more freely—but it avoided a massive macroeconomic shock."
+                    },
+                    {
+                        text: "Get the government out of the loan business completely.",
+                        pov: 0.4, bud: 0.2, app: -4, inf: -0.2,
+                        aftermath: "You shifted the risk to private banks. Banks immediately applied strict financial standards, meaning fewer poor students could get loans. This balanced the budget, but locked a generation out of higher education, stunting the nation's long-term human capital."
+                    }
+                ]
+            },
+            {
+                title: "The Winter Energy Spike",
+                desc: "A harsh winter is approaching, and heating oil and electricity prices are skyrocketing, forcing poor families to choose between heating and eating.",
+                art: 'factory',
+                options: [
+                    {
+                        text: "Pour billions into green energy subsidies (solar/wind).",
+                        pov: -0.6, bud: -0.9, app: 2, inf: 1.5,
+                        aftermath: "You created thousands of new green jobs. However, trying to switch the power grid too quickly without enough battery storage led to massive grid instability. When the wind didn't blow, energy prices spiked violently, hurting the poor."
+                    },
+                    {
+                        text: "Implement a carbon tax and mail the money to citizens.",
+                        pov: -0.2, bud: 0.4, app: -1, inf: -0.2,
+                        aftermath: "Taxing carbon is highly efficient for the environment. But the immediate rise in gas and shipping costs heavily impacted the working poor. The rebate check you mailed them eventually balanced it out, but the delay caused brief financial distress."
+                    },
+                    {
+                        text: "Open up federal lands for emergency oil drilling.",
+                        pov: 0.2, bud: 0.1, app: -2, inf: -0.8,
+                        aftermath: "Flooding the market with oil collapsed energy prices. This functioned as a massive, immediate tax cut for the poor, destroying inflation. However, you angered environmentalists and ignored the unpriced long-term risks of climate damage."
+                    }
+                ]
+            },
+            {
+                title: "The Childcare Struggle",
+                desc: "Daycare costs more than college in some states. Parents are being forced to quit their jobs just to watch their kids.",
+                art: 'money',
+                options: [
+                    {
+                        text: "Make preschool and daycare universally free.",
+                        pov: -1.2, bud: -0.6, app: 4, inf: 0.8,
+                        aftermath: "Parents rushed back into the labor force, drastically lowering poverty. However, pumping massive amounts of federal money directly into childcare centers caused those businesses to raise their rates, absorbing the subsidy and increasing systemic costs."
+                    },
+                    {
+                        text: "Send parents a monthly 'Child Tax Credit' in cash.",
+                        pov: -1.0, bud: -0.4, app: 3, inf: 0.6,
+                        aftermath: "Giving parents direct cash allowed them to optimize their own care solutions—whether that meant paying a neighbor, or one parent staying home. It successfully reduced child poverty, but created a permanent new multi-billion dollar hole in the budget."
+                    },
+                    {
+                        text: "Deregulate daycares (allow more kids per teacher).",
+                        pov: 0.2, bud: 0, app: -3, inf: -0.3,
+                        aftermath: "By allowing one worker to watch more children, you lowered the business cost of daycare, making it cheaper. However, the quality of care plummeted. Middle-class parents fled the system, leaving a poorly-run, low-quality network solely for the poor."
+                    }
+                ]
+            },
+            {
+                title: "Foreign Trade and Factory Jobs",
+                desc: "Cheap imports are destroying American manufacturing towns. The rust belt is demanding protection.",
+                art: 'newspaper',
+                options: [
+                    {
+                        text: "Slap massive tariffs on foreign goods.",
+                        pov: -0.5, bud: 0.3, app: 2, inf: 2.5,
+                        aftermath: "American factories reopened and blue-collar jobs returned. However, tariffs are essentially a hidden tax on consumers. The price of basic goods, clothes, and electronics exploded, heavily damaging the purchasing power of the exact people you tried to help."
+                    },
+                    {
+                        text: "Give targeted grants to advanced tech manufacturing.",
+                        pov: -0.2, bud: -0.3, app: 1, inf: 0.5,
+                        aftermath: "You successfully lured high-tech factories (like microchips) back to the US. It secured the supply chain, but these modern factories are highly automated. They created jobs for engineers, but did very little to help the uneducated workers currently in poverty."
+                    },
+                    {
+                        text: "Commit to completely free trade.",
+                        pov: 0.4, bud: -0.1, app: -2, inf: -1.2,
+                        aftermath: "By importing goods from low-wage countries, consumer prices plummeted, rapidly cooling inflation and making life cheaper for everyone. The tragic trade-off was that entire domestic industrial towns were wiped out, driving localized poverty spikes."
+                    }
+                ]
+            },
+            {
+                title: "The Big Infrastructure Bill (Midterm Year)",
+                desc: "Our bridges are collapsing and our airports are ancient. It's time for a massive national building project to show you deserve to stay in office.",
+                art: 'graph',
+                options: [
+                    {
+                        text: "Borrow trillions for a massive public works boom.",
+                        pov: -0.8, bud: -0.8, app: 2, inf: 2.0,
+                        aftermath: "You absorbed millions of unemployed workers into construction jobs, crushing poverty. But the sheer amount of money the government borrowed and spent forced the Federal Reserve to hike interest rates to fight the resulting inflation, making mortgages and loans expensive for everyone else."
+                    },
+                    {
+                        text: "Let private companies build and own the roads (Tolls).",
+                        pov: -0.3, bud: -0.1, app: 1, inf: 0.4,
+                        aftermath: "Private Wall Street capital funded the new bridges. You saved the federal budget entirely! However, the private companies put steep toll booths on every new road, effectively creating a daily, regressive tax that hit low-income commuters the hardest."
+                    },
+                    {
+                        text: "Cancel the projects to balance the budget.",
+                        pov: 0.6, bud: 0.5, app: -3, inf: -1.0,
+                        aftermath: "You championed fiscal responsibility and balanced the books. The deflationary pressure cooled the economy, but cancelling massive contracts led to immediate layoffs in the construction and steel sectors, hurting blue-collar workers."
+                    }
+                ]
+            },
+            {
+                title: "Grocery Prices Surging",
+                desc: "Droughts and supply chain issues have made basic groceries unaffordable. Families are struggling to buy bread and milk.",
+                art: 'factory',
+                options: [
+                    {
+                        text: "Order grocery stores to freeze their prices.",
+                        pov: -0.4, bud: 0, app: 3, inf: -1.0,
+                        aftermath: "Food became instantly affordable on paper, and the public cheered. However, because farmers could no longer cover the rising cost of fertilizer and diesel, they simply planted fewer crops. This led to severe physical food shortages and empty grocery shelves."
+                    },
+                    {
+                        text: "Dramatically expand Food Stamps (SNAP).",
+                        pov: -0.9, bud: -0.4, app: 2, inf: 0.8,
+                        aftermath: "You gave the poor the money they needed to survive the crisis. But by giving millions of people more money to bid on the same amount of food, you massively increased aggregate demand, driving up food prices even higher for the middle class."
+                    },
+                    {
+                        text: "Pay farmers directly to overproduce food.",
+                        pov: -0.3, bud: -0.3, app: 0, inf: -0.5,
+                        aftermath: "By subsidizing the supply side, farmers flooded the market with corn and wheat. Prices naturally dropped at the grocery store without causing shortages. The downside? You created a permanent, expensive federal reliance on farm subsidies."
+                    }
+                ]
+            },
+            {
+                title: "The Rise of the Machines",
+                desc: "Artificial Intelligence and advanced robotics are rapidly replacing truck drivers, warehouse workers, and even office staff.",
+                art: 'graph',
+                options: [
+                    {
+                        text: "Implement a heavy 'Robot Tax' on automated labor.",
+                        pov: -0.2, bud: 0.4, app: 1, inf: 1.0,
+                        aftermath: "You slowed the adoption of AI, protecting millions of existing jobs in the short term. However, by stopping businesses from upgrading, you crippled the nation's productivity growth. American goods became more expensive than foreign competitors, hurting the economy long-term."
+                    },
+                    {
+                        text: "Fund massive worker retraining programs.",
+                        pov: -0.5, bud: -0.3, app: 2, inf: 0.2,
+                        aftermath: "You poured money into teaching displaced warehouse workers how to code or install solar panels. It was highly effective for younger workers, but older demographics struggled to transition, leaving a stubborn block of structural unemployment intact."
+                    },
+                    {
+                        text: "Let automation happen naturally.",
+                        pov: 0.5, bud: 0, app: -2, inf: -1.0,
+                        aftermath: "Companies automated rapidly. The cost to produce goods plummeted, leading to incredible deflation and cheap products. However, the labor market friction was brutal; millions of workers with obsolete skills were violently cast into permanent poverty."
+                    }
+                ]
+            },
+            {
+                title: "The Aging Population",
+                desc: "The Social Security trust fund is running dry. Too many people are retiring, and not enough young people are working to support them.",
+                art: 'whitehouse',
+                options: [
+                    {
+                        text: "Raise the retirement age by 3 years.",
+                        pov: 0.6, bud: 0.6, app: -4, inf: -0.4,
+                        aftermath: "Keeping seniors in the workforce saved the federal budget from collapse. However, life expectancy isn't equal. White-collar workers easily stayed at their desks, but manual laborers whose bodies were broken were left entirely destitute, spiking elderly poverty."
+                    },
+                    {
+                        text: "Tax the rich to cover the shortfall.",
+                        pov: -0.3, bud: 0.7, app: 1, inf: -0.1,
+                        aftermath: "You removed the cap on payroll taxes, ensuring the wealthy paid their share. It solved the math problem and protected seniors. The velocity of money slowed slightly among high earners, but a systemic collapse was averted."
+                    },
+                    {
+                        text: "Privatize pensions; let people invest in the stock market.",
+                        pov: 0.2, bud: 0.2, app: -3, inf: 0.5,
+                        aftermath: "You moved responsibility to the individual. Those who were savvy investors saw massive returns during the bull market. But those who lacked financial literacy, or happened to retire during a sudden market crash, found themselves penniless."
+                    }
+                ]
+            },
+            {
+                title: "The Railroad Strike",
+                desc: "The nation's rail workers are threatening to strike over brutal schedules. If trains stop moving, the supply chain will completely collapse.",
+                art: 'protest',
+                options: [
+                    {
+                        text: "Force the rail companies to meet the union's demands.",
+                        pov: -0.7, bud: 0, app: 1, inf: 1.2,
+                        aftermath: "The workers won much-needed sick days and huge raises, correcting a massive imbalance in bargaining power. However, the railroad monopolies immediately passed their new labor costs onto shipping rates, causing prices of all transported goods to rise nationwide."
+                    },
+                    {
+                        text: "Use executive power to force them back to work.",
+                        pov: 0.4, bud: 0, app: -1, inf: -0.6,
+                        aftermath: "You broke the strike. The trains kept running, averting a supply chain disaster and keeping consumer prices low. However, you destroyed the workers' leverage, leading to long-term wage stagnation for blue-collar transportation workers."
+                    }
+                ]
+            },
+            {
+                title: "Welfare Reform",
+                desc: "Critics claim the welfare system is bloated and discourages work. They demand you add strict work requirements to receive food and housing aid.",
+                art: 'newspaper',
+                options: [
+                    {
+                        text: "Implement strict work requirements and drug tests.",
+                        pov: 0.7, bud: 0.3, app: 1, inf: -0.2,
+                        aftermath: "The tough love pushed capable, able-bodied individuals back into the workforce, helping the economy. But the immense bureaucratic friction caused the most vulnerable—the mentally ill, the severely disabled—to lose their lifelines, creating a visible spike in extreme street-level poverty."
+                    },
+                    {
+                        text: "Remove all conditionality. Give aid freely.",
+                        pov: -0.8, bud: -0.6, app: 1, inf: 0.7,
+                        aftermath: "You wiped out the confusing red tape. Poverty metrics improved rapidly as aid reached everyone instantly. The downside? The cost was astronomical, and handing out aid to those who might not truly need it fueled systemic inflation."
+                    }
+                ]
+            },
+            {
+                title: "The Auto Industry Collapse",
+                desc: "A major American automaker made terrible business decisions and is about to go bankrupt. 200,000 factory jobs will vanish overnight if you don't act.",
+                art: 'factory',
+                options: [
+                    {
+                        text: "Bail them out with taxpayer money.",
+                        pov: 0, bud: -0.8, app: 0, inf: 0.6,
+                        aftermath: "You saved the company and prevented a localized economic apocalypse. But you created a dangerous 'moral hazard.' Corporations learned that if they become big enough, they can take reckless risks and the government will socialize the losses."
+                    },
+                    {
+                        text: "Let the company fail. That's capitalism.",
+                        pov: 1.5, bud: 0, app: -3, inf: -0.8,
+                        aftermath: "You allowed the market to undergo 'creative destruction.' The short-term devastation was brutal, destroying thousands of livelihoods. Long-term, capital was freed up to flow toward newer, more efficient electric vehicle startups, but the fired workers suffered deeply."
+                    }
+                ]
+            },
+            {
+                title: "The Wealth Tax Debate",
+                desc: "Billionaires are paying a lower effective tax rate than their secretaries due to loopholes and holding unsold stock. The public is furious.",
+                art: 'money',
+                options: [
+                    {
+                        text: "Tax capital gains at the same rate as a normal salary.",
+                        pov: -0.3, bud: 0.7, app: 2, inf: -0.4,
+                        aftermath: "Equalizing the tax code brought in massive revenue and leveled the playing field between labor and capital. However, because investing was suddenly less profitable, venture capital funding dried up, severely slowing the formation of new innovative startups."
+                    },
+                    {
+                        text: "Tax 'unrealized' wealth (stocks they haven't sold).",
+                        pov: -0.1, bud: 0.9, app: 1, inf: -0.6,
+                        aftermath: "You forced the ultra-rich to pay taxes on their theoretical net worth. The budget swelled, but the chaos was immense. Accurately valuing private companies proved impossible, and a wave of capital flight occurred as the rich moved their assets offshore."
+                    },
+                    {
+                        text: "Lower taxes for investors to spur job creation.",
+                        pov: 0.4, bud: -0.4, app: -2, inf: 0.5,
+                        aftermath: "Lower taxes created a massive stock market boom and encouraged wild investment. The overall economy grew rapidly, but the benefits accrued almost entirely to the top 10% of households who own assets, severely exacerbating wealth stratification."
+                    }
+                ]
+            },
+            {
+                title: "The Border and the Harvest",
+                desc: "Farms are rotting and construction sites are stalled because there aren't enough workers. Businesses are begging for immigrant labor.",
+                art: 'protest',
+                options: [
+                    {
+                        text: "Grant millions of temporary work visas.",
+                        pov: 0.3, bud: 0.2, app: -1, inf: -1.5,
+                        aftermath: "A massive influx of labor immediately resolved the supply chain bottlenecks. Food and housing costs dropped, crushing inflation. However, the sudden expansion of the labor pool created intense wage competition at the bottom, slightly ticking domestic poverty upward."
+                    },
+                    {
+                        text: "Close the border and fine businesses that hire illegally.",
+                        pov: -0.2, bud: -0.1, app: 1, inf: 1.8,
+                        aftermath: "By shrinking the labor pool, domestic manual laborers suddenly had massive bargaining power. Their wages rose, pulling them out of poverty. Conversely, the catastrophic lack of farm workers caused grocery and housing prices to skyrocket."
+                    }
+                ]
+            },
+            {
+                title: "The Innovation Pitch",
+                desc: "You have a small surplus this quarter. Do you spend it on long-term science, or give it directly back to the people?",
+                art: 'graph',
+                options: [
+                    {
+                        text: "Fund a massive Moonbase and Fusion Energy project.",
+                        pov: 0, bud: -0.4, app: 0, inf: -0.2,
+                        aftermath: "You invested heavily in fundamental science. The resulting advancements in materials and energy will yield incredible productivity multipliers for the next generation, but it did absolutely nothing to help citizens currently living in poverty today."
+                    },
+                    {
+                        text: "Mail everyone a final $500 stimulus check.",
+                        pov: -0.8, bud: -0.5, app: 2, inf: 1.0,
+                        aftermath: "You sacrificed the nation's long-term technological growth in favor of short-term consumption. Poverty dropped as people bought groceries and paid off credit cards, but the sudden demand without new goods production just drove up inflation again."
+                    }
+                ]
+            },
+            {
+                title: "The Final Budget",
+                desc: "This is your final act before the election. Your legacy and your reelection depend on these final macroeconomic indicators.",
+                art: 'whitehouse',
+                options: [
+                    {
+                        text: "Go on an aggressive spending spree.",
+                        pov: -0.9, bud: -0.7, app: 2, inf: 1.5,
+                        aftermath: "You intentionally flooded the economy with liquidity and deficit spending to artificially drive poverty down right before the vote. It worked mechanically, but you risk pushing the country into an inflationary spiral next term."
+                    },
+                    {
+                        text: "Implement strict austerity and balance the budget.",
+                        pov: 0.8, bud: 0.9, app: -2, inf: -1.2,
+                        aftermath: "You slammed the brakes on government spending to ensure fiscal sanity. The macroeconomic cooling killed inflation beautifully, but the sudden reduction in government demand spiked unemployment, unfortunately reversing hard-fought poverty gains at the worst time."
+                    }
+                ]
+            }
+        ];
+
+        function updateUI() {
+            UI.turn.innerText = `${state.turn}/20`;
+            UI.poverty.innerText = `${state.poverty.toFixed(1)}%`;
+            UI.budget.innerText = `$${state.budget.toFixed(1)}T`;
+            UI.approval.innerText = `${state.approval}%`;
+            UI.inflation.innerText = `${state.inflation.toFixed(1)}%`;
+
+            UI.poverty.className = state.poverty > 8.0 ? 'alert-text' : (state.poverty > 6.0 ? 'warning-text' : '');
+            UI.budget.className = state.budget < 0 ? 'alert-text' : (state.budget < 1.0 ? 'warning-text' : '');
+            UI.approval.className = state.approval < 30 ? 'alert-text' : (state.approval < 50 ? 'warning-text' : '');
+            UI.inflation.className = state.inflation > 10.0 ? 'alert-text' : (state.inflation > 5.0 ? 'warning-text' : '');
+        }
+
+        function clearControls() {
+            UI.controls.innerHTML = '';
+        }
+
+        function createButton(text, onClick) {
+            const btn = document.createElement('button');
+            btn.innerText = `> ${text}`;
+            btn.onclick = onClick;
+            UI.controls.appendChild(btn);
+        }
+
+        function formatDiff(val, unit, invertColors = false) {
+            if (val === 0) return `<span style="color:#aaa">0${unit}</span>`;
+            let sign = val > 0 ? '+' : '';
+            let isPositiveEvent = invertColors ? val < 0 : val > 0;
+            let cssClass = isPositiveEvent ? 'diff-pos' : 'diff-neg';
+            return `<span class="${cssClass}">${sign}${val.toFixed(1)}${unit}</span>`;
+        }
+
+        function createRestartButton() {
+            const btn = document.createElement('button');
+            btn.innerText = `> [ RESTART GAME ]`;
+            btn.style.marginTop = "15px";
+            btn.style.color = "var(--warning-color)";
+            btn.style.borderColor = "var(--warning-color)";
+            btn.onclick = initGame;
+            UI.controls.appendChild(btn);
+        }
+
+        function loadScenario() {
+            updateUI();
+            const scenario = scenarios[state.turn - 1];
+            
+            UI.ascii.innerText = ASCII[scenario.art] || ASCII.whitehouse;
+            UI.text.innerHTML = `<strong>${scenario.title}</strong><br><br>${scenario.desc}`;
+            
+            clearControls();
+            
+            scenario.options.forEach(opt => {
+                let costStr = "";
+                if (opt.bud < 0) costStr = ` (Cost: $${Math.abs(opt.bud).toFixed(1)}T)`;
+                else if (opt.bud > 0) costStr = ` (Revenue: $${opt.bud.toFixed(1)}T)`;
+                else costStr = ` (Cost: $0)`;
+                
+                createButton(`${opt.text}${costStr}`, () => handleChoice(opt));
+            });
+
+            createRestartButton();
+        }
+
+        function handleChoice(option) {
+            state.poverty = fix(state.poverty + option.pov);
+            state.budget = fix(state.budget + option.bud);
+            state.approval = fix(state.approval + option.app);
+            state.inflation = fix(state.inflation + option.inf);
+
+            state.poverty = Math.max(0, state.poverty);
+            state.approval = Math.min(100, Math.max(0, state.approval));
+
+            showAftermath(option);
+        }
+
+        function showAftermath(option) {
+            updateUI();
+            UI.ascii.innerText = ASCII.newspaper;
+            
+            let diffHtml = `
+                <div class="aftermath-box">
+                    <strong>ECONOMIC RIPPLE EFFECTS:</strong><br>
+                    Poverty: ${formatDiff(option.pov, '%', true)} (Now: ${state.poverty.toFixed(1)}%)<br>
+                    Budget: ${formatDiff(option.bud, 'T', false)} (Now: $${state.budget.toFixed(1)}T)<br>
+                    Approval: ${formatDiff(option.app, '%', false)} (Now: ${state.approval}%)<br>
+                    Inflation: ${formatDiff(option.inf, '%', true)} (Now: ${state.inflation.toFixed(1)}%)
+                </div>
+            `;
+
+            UI.text.innerHTML = `<strong>THE AFTERMATH</strong><br><br>${option.aftermath}${diffHtml}`;
+            
+            clearControls();
+            createButton("CONTINUE TO NEXT CYCLE", proceedToNextTurn);
+            createRestartButton();
+        }
+
+        function proceedToNextTurn() {
+            if (state.approval < 20) return gameOver("IMPEACHED", "Your approval rating dropped below 20%. The public rioted over your policies, and Congress removed you from office.");
+            if (state.budget < 0) return gameOver("BANKRUPT", "The United States defaulted on its debt. The global economy collapsed, and you were forced to resign in disgrace.");
+            if (state.inflation >= 15) return gameOver("HYPERINFLATION", "Inflation hit 15%. The dollar is practically worthless. Protesters have stormed the capital.");
+
+            if (state.turn === 10) {
+                handleMidterms();
+                return;
+            }
+
+            if (state.turn >= 20) {
+                handleEndgame();
+                return;
+            }
+
+            state.turn++;
+            loadScenario();
+        }
+
+        function handleMidterms() {
+            UI.ascii.innerText = ASCII.newspaper;
+            clearControls();
+
+            if (state.poverty >= 8.0) {
+                state.approval -= 15;
+                state.budget = fix(state.budget - 0.5); 
+                state.midtermsFailed = true;
+                
+                if(state.approval < 20) return gameOver("VOTE OF NO CONFIDENCE", "Your approval crashed below 20% after failing key economic benchmarks during the midterms.");
+
+                UI.text.innerHTML = `<strong>MIDTERM DISASTER</strong><br><br>The voters are angry. Poverty remains at ${state.poverty.toFixed(1)}%, failing your target of getting it under 8.0%.<br><br>You lost seats in Congress. The resulting political gridlock makes it harder to pass budgets, stripping away some of your funds.<br><br><span class="diff-neg">-15% Approval</span><br><span class="diff-neg">-$0.5T Budget (Gridlock)</span>`;
+            } else {
+                state.approval += 10;
+                UI.text.innerHTML = `<strong>MIDTERM VICTORY</strong><br><br>Poverty has dropped to ${state.poverty.toFixed(1)}%. The public is thrilled with your economic stewardship. You gained a massive mandate in Congress.<br><br><span class="diff-pos">+10% Approval</span>`;
+            }
+
+            createButton("PROCEED TO CYCLE 11", () => {
+                state.turn++;
+                loadScenario();
+            });
+            createRestartButton();
+            updateUI();
+        }
+
+        function handleEndgame() {
+            UI.header.classList.add('hidden');
+            clearControls();
+
+            // CRUCIAL UPDATE: Final threshold is now 6.0%
+            if (state.poverty <= 6.0) {
+                UI.ascii.innerText = ASCII.whitehouse;
+                UI.text.innerHTML = `<strong>REELECTION SECURED</strong><br><br>Final Poverty Rate: <span class="diff-pos">${state.poverty.toFixed(1)}%</span><br><br>Congratulations, Mr. President. You made incredibly tough, practical choices. You navigated the terrifying ripples of inflation, supply shortages, and labor strikes to fulfill your core campaign promise: driving poverty to 6.0% or lower. History will remember you.`;
+                createButton("PLAY AGAIN", initGame);
+            } else {
+                UI.ascii.innerText = ASCII.skull;
+                UI.text.innerHTML = `<strong>VOTED OUT</strong><br><br>Final Poverty Rate: <span class="diff-neg">${state.poverty.toFixed(1)}%</span> (Target was <= 6.0%)<br><br>You failed your core campaign promise. The complex web of economic ripples—inflation, job losses, and massive deficits—was too much to handle. Your opponent crushed you in the election.`;
+                createButton("RETRY SIMULATION", initGame);
+            }
+        }
+
+        function gameOver(title, reason) {
+            UI.header.classList.add('hidden');
+            UI.ascii.innerText = ASCII.skull;
+            UI.text.innerHTML = `<strong>GAME OVER: ${title}</strong><br><br>${reason}<br><br>Your administration has suffered a complete collapse.`;
+            clearControls();
+            createButton("REBOOT SIMULATION", initGame);
+        }
+
+        function initGame() {
+            state = { turn: 1, poverty: 10.2, budget: 4.0, approval: 50, inflation: 3.0, midtermsFailed: false };
+            UI.header.classList.add('hidden');
+            
+            UI.ascii.innerText = ASCII.whitehouse;
+            UI.text.innerHTML = `
+                <strong>THE OVAL OFFICE: POVERTY SIMULATOR</strong><br><br>
+                Welcome, Mr. President. You were elected on one major promise: fixing the poverty crisis.<br><br>
+                Starting Poverty Rate: <strong>10.2%</strong><br>
+                National Budget: <strong>$4.0 Trillion</strong><br><br>
+                <strong>YOUR GOALS:</strong><br>
+                - Survive the Midterms (Cycle 10) by getting poverty below 8.0%.<br>
+                - Win Reelection (Cycle 20) by getting poverty to <strong>6.0% or lower</strong>.<br><br>
+                Every choice has an unseen ripple effect. Fixing one problem might trigger inflation, bankrupt the country, or destroy your approval rating. Good luck.
+            `;
+            
+            clearControls();
+            createButton("ENTER THE OVAL OFFICE", () => {
+                UI.header.classList.remove('hidden');
+                loadScenario();
+            });
+        }
+
+        window.onload = initGame;
+    </script>
+</body>
+</html>
